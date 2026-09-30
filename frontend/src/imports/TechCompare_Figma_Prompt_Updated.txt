@@ -1,0 +1,347 @@
+so this is what the current prompt for the AI tool we've been using
+
+Build a full-featured, responsive interactive web application named "TechCompare" that compares tech devices based on technical specs and tailored user preferences (e.g., Gaming, Photography, Daily Use), similar to Versus or GSM Arena.
+
+### TECHNOLOGY STACK
+- Framework: Next.js with App Router.
+- Language: TypeScript.
+- Database: Supabase PostgreSQL.
+- Supabase integration: `@supabase/supabase-js` and `@supabase/ssr`.
+- The application must be structured so that database access happens through the Next.js server/API layer where appropriate.
+- Do not create a separate database or mock database.
+
+### 1. CATEGORY ISOLATION & PROTOTYPE SCOPE
+- Initial Device Scope: THIS PROTOTYPE IS STRICTLY FOR SMARTPHONES.
+- Category Separation Architecture:
+  - Users must select a device category upfront (e.g., "Smartphones", "Laptops", "Tablets") before accessing the comparison workspace.
+  - Device listings, search fields, and auto-completes MUST be isolated per category.
+  - Users MUST NOT be able to see or select devices from different categories simultaneously (e.g., Smartphones cannot be compared against Laptops).
+- Pricing Standard: ALL device prices across the application MUST be displayed strictly in US Dollars ($ USD).
+
+### 2. DESIGN SYSTEM & VISUAL STYLING
+- Theme: Soft, warm, modern, clean, and highly intuitive UI/UX.
+- Backgrounds: Off-white / light beige canvas (#FBF9F5), pure white card surfaces (#FFFFFF) with warm neutral borders (#EAE6DF).
+- Primary Accent: Bright warm orange (#FF6800 or #F25C05) for CTA buttons, highlighted spec wins, and active state indicators.
+- Secondary Accent: Soft coral/peach for secondary device overlay metrics.
+- Typography: Clean sans-serif (Inter, System Sans, or Roboto) with high contrast for numbers and spec values.
+- Shapes & Shadows: Rounded corners (12px to 16px radius), subtle soft drop shadows (0 4px 12px rgba(0,0,0,0.04)).
+- Overall Winner Visual Highlight: Show an "Overall Winner" only when a defined scoring profile or overall scoring formula produces a winner. For profile comparisons, clearly indicate the highest-scoring device for that profile. For personalized comparisons, use the calculated Match Score. Do not visually declare a winner based on arbitrary frontend logic. Winning spec rows in detailed comparison tables should feature soft warm-tint highlights.
+
+### 3. CORE LAYOUT & INTERACTIVE FLOW
+- Header: Logo "TechCompare", global search bar, category filters (Smartphones selected by default), light/dark switch.
+- Device Selector (Hero Section):
+  - 2 to 3 sticky comparison slots where users can search and pick smartphones to compare side-by-side.
+  - Quick preset buttons (e.g., "Flagship Showdown", "Best Gaming Phones").
+- Hexagonal Radar Graph (Overall Hardware Visualizer):
+  - An interactive 6-axis SVG/Canvas spider chart that visualizes normalized scores (0-100) for the selected smartphones.
+  - Overlapping semi-transparent color fills for each selected smartphone so users instantly see strengths/weaknesses.
+  - Smooth Animated Transitions: When changing profile tabs or selecting new devices, the hexagonal polygon shapes must animate fluidly into their new path coordinates rather than snapping instantly.
+  - Vector Hover Tooltips / Popovers: When the user hovers their mouse over a specific axis/corner point on the hexagonal diagram (e.g., "Main Aperture" or "Charging Wattage"), a small, smooth popover window must appear immediately next to the cursor. This tooltip must ONLY display the given numeric/text specs corresponding to that specific parameter for all currently compared smartphones side-by-side.
+  - Toggling profile tabs switches the axes of the radar chart based on the chosen profile: Overall, Gaming, Photography, or Daily Use.
+- Filtering & Preference Selector:
+  - Sliders/toggles for user priorities (e.g., "I care most about Battery", "Camera focus").
+  - Dynamically recalculates a "Match Score %" for each device based on user weights.
+- Detailed Spec Comparison Tables:
+  - Collapsible accordion sections highlighting clear "WINNER" badges for superior specs.
+
+### 4. DOMAIN-SPECIFIC SCORING & SPEC METRICS (SMARTPHONES)
+The app must evaluate and compare smartphones across these exact weighted attributes:
+
+A. GAMING PROFILE
+1. CPU Architecture Generation & Process Node (newer generation & smaller nm = higher score).
+2. CPU Core Configuration & Max Clock Speed (higher GHz & performance core count = higher score).
+3. GPU Architecture, Execution Units & Clock (newer architecture & more units = higher score).
+4. RAM Capacity, Type & Bus Width (LPDDR5X > LPDDR5, wider bus = higher score).
+5. Cooling System Type & Surface Area (vapor chamber size & active cooling = higher score).
+6. Display Refresh Rate & Touch Sampling Rate (e.g., 120Hz/144Hz + high touch rate = higher score).
+
+B. PHOTOGRAPHY PROFILE
+1. Main Camera Sensor Size (larger optical format like 1" > 1/1.56" = higher score).
+2. Main Lens Aperture (lower f-number e.g. f/1.4 > f/1.8 = higher score).
+3. Pixel Size & Binning Capability (larger micron μm effective size = higher score).
+4. Stabilization Hardware (OIS + Sensor-shift > basic OIS > EIS = higher score).
+5. Focal Range & Coverage (native optical zoom levels e.g. 0.5x, 1x, 3x, 5x = higher score).
+6. Video Hardware Capabilities (4K@120fps, 8K, 10-bit Log recording = higher score).
+
+C. GENERAL USE / OTHER PROFILE
+1. Battery Capacity (mAh count = higher score).
+2. Charging Wattage & Wireless Charging Speed (higher W = higher score).
+3. Display Resolution & Pixel Density (PPI count = higher score).
+4. Display Refresh Rate & LTPO Tech (dynamic 1-120Hz = higher score).
+5. Device Weight (lower weight in grams = higher score).
+6. Storage Capacity & Speed Standard (UFS 4.0 > UFS 3.1 = higher score).
+
+### 5. BACKEND, DATABASE & AI INTEGRATION
+
+The application MUST use an external database as the single source of truth for smartphone data. Do NOT implement the smartphone catalogue as hardcoded frontend data.
+
+#### A. DATABASE ARCHITECTURE
+
+Use PostgreSQL through Supabase as the primary database.
+
+The application must be structured as:
+
+Next.js UI → Next.js server/API layer → Supabase PostgreSQL
+
+The Next.js server/API layer is the backend for this prototype. Do not create a second database or a separate backend stack unless explicitly requested later.
+
+The frontend must retrieve smartphone records dynamically from the backend/API. Smartphone specifications must NOT be permanently hardcoded into React/JavaScript components.
+
+The database must contain a `devices` table with at least these fields:
+
+* `id`
+* `category`
+* `brand`
+* `model_name`
+* `release_year`
+* `price_usd`
+* `image_url`
+
+Hardware specification fields should include the raw values required by the comparison system, including:
+
+* `ram_gb`
+* `ram_type`
+* `ram_bus_width_bits`
+* `storage_gb`
+* `storage_type`
+* `cpu_name`
+* `cpu_generation`
+* `cpu_process_nm`
+* `cpu_max_clock_ghz`
+* `cpu_cores`
+* `cpu_performance_cores`
+* `cpu_efficiency_cores`
+* `gpu_name`
+* `gpu_architecture`
+* `gpu_execution_units`
+* `gpu_clock`
+* `cooling_type`
+* `cooling_surface_area_mm2`
+* `display_resolution`
+* `display_ppi`
+* `display_refresh_rate`
+* `display_min_refresh_rate`
+* `touch_sampling_rate`
+* `display_ltpo`
+* `battery_mah`
+* `charging_w`
+* `wireless_charging_w`
+* `weight_g`
+* `main_sensor_size`
+* `main_aperture`
+* `pixel_size_um`
+* `pixel_binning`
+* `stabilization`
+* `optical_zoom`
+* `video_capabilities`
+
+Additional fields may be added where necessary.
+
+#### B. DATABASE IS THE SOURCE OF TRUTH
+
+Do NOT create a fixed array such as:
+
+```javascript
+const devices = [...]
+```
+
+containing the smartphone catalogue.
+
+Do NOT limit the comparison system to the 2–3 smartphones initially used during development.
+
+If seed/demo data is necessary, it must be inserted into the database itself rather than hardcoded into the frontend.
+
+The UI must work with any smartphone returned by the database that satisfies the `category = 'smartphone'` filter.
+
+### DATABASE DATA RULE
+- The existing Supabase database is the single source of truth.
+- The frontend must not invent, fabricate, or duplicate smartphone records.
+- Do not create mock smartphones that are presented as real database records.
+- If database integration is not available during UI generation, use clearly marked loading, empty, or connection-error states rather than creating a fake permanent catalogue.
+- Do not silently substitute hardcoded data when the database request fails.
+
+#### C. DEVICE SEARCH
+
+Implement dynamic device searching through an API/backend function.
+
+Required functionality:
+
+`GET /api/devices/search?category=smartphone&q=<search term>`
+
+The endpoint must query the database and return matching records.
+
+Examples:
+
+```text
+/api/devices/search?category=smartphone&q=iPhone
+/api/devices/search?category=smartphone&q=Samsung
+/api/devices/search?category=smartphone&q=Pixel
+```
+
+The search results must be generated from the current database contents.
+
+If a new smartphone is inserted into the database, it must become searchable without changing the frontend code.
+
+Do not implement fake API functions that return hardcoded smartphone objects.
+Do not simulate API responses with local arrays or static JSON.
+API calls must be structured to retrieve actual data from Supabase.
+
+#### D. DEVICE RETRIEVAL
+
+Implement a device-detail endpoint/function:
+
+`GET /api/devices/<id>`
+
+This must retrieve the complete specification record for the selected smartphone.
+
+When a user selects a smartphone for comparison, retrieve its data from the backend/database rather than using a predefined frontend object.
+
+#### E. COMPARISON API
+
+Implement a comparison endpoint/function:
+
+`POST /api/compare`
+
+Example request:
+
+```json
+{
+  "deviceIds": [1, 2, 3],
+  "profile": "gaming"
+}
+```
+
+The endpoint must retrieve the selected devices from the database and return their comparison data and calculated scores. It must accept any 2 or 3 valid smartphone IDs.
+
+#### F. PERSONALIZED MATCH API
+
+Implement a personalized matching endpoint/function:
+
+`POST /api/match`
+
+Example request:
+
+```json
+{
+  "deviceIds": [1, 2, 3],
+  "weights": {
+    "battery": 0.4,
+    "camera": 0.3,
+    "performance": 0.2,
+    "display": 0.1
+  }
+}
+```
+
+The endpoint must calculate a Match Score for each selected smartphone using the supplied user weights and database-retrieved specifications.
+
+#### G. COMPARISON
+
+The comparison system must accept any 2 or 3 smartphones returned by the database.
+
+Example:
+
+```text
+User searches:
+"iPhone 17"
+
+        ↓
+
+Database search
+
+        ↓
+
+User selects iPhone 17
+
+        ↓
+
+User searches:
+"Galaxy S26"
+
+        ↓
+
+Database search
+
+        ↓
+
+User selects Galaxy S26
+
+        ↓
+
+Backend retrieves both records
+
+        ↓
+
+Comparison engine calculates/display scores
+```
+
+There must be no hardcoded restriction on which smartphone models can be compared.
+
+#### H. CATEGORY ISOLATION
+
+Every device record must contain:
+
+`category = "smartphone"`
+
+All smartphone searches must filter by this category.
+
+The architecture should support future categories such as:
+
+* smartphone
+* laptop
+* tablet
+
+but the current implementation must contain and expose ONLY the smartphone category.
+
+A smartphone search must never return laptops, tablets, or other device types.
+
+#### I. SCORING ENGINE
+
+The comparison system must use the raw specifications stored in the database to calculate the Gaming, Photography, and General Use profiles.
+
+The database stores raw smartphone specifications. The backend/server-side scoring module calculates normalized 0–100 scores from those raw specifications.
+
+Do not store `gaming_score`, `photography_score`, or `general_score` as required device fields. Calculate these scores dynamically from the raw specifications.
+
+The scoring engine must be implemented separately from the UI. The frontend only displays calculated results and must not duplicate scoring formulas inside React components.
+
+Changing the selected smartphones must not require changing frontend code. Changing scoring formulas or weights must not require changing individual smartphone records.
+
+#### J. DATABASE SEED DATA
+
+For development, insert 2–3 real smartphone records into Supabase as seed data.
+
+These records are ONLY initial database records.
+
+They must NOT be implemented as hardcoded frontend objects.
+
+The application must behave exactly the same if 3, 30, or 3,000 smartphone records exist in the database.
+
+#### K. EMPTY AND ERROR STATES
+
+Implement proper states for:
+
+* No search results
+* Database connection failure
+* Device not found
+* Loading search results
+* Loading device specifications
+* Empty comparison slot
+
+Do not silently fall back to hardcoded smartphone data when the database is unavailable.
+
+#### L. AI COMPARISON OVERVIEW
+
+When two or more smartphones have been selected, send their database-retrieved specifications and calculated comparison data to the server-side AI endpoint.
+
+The AI must receive the actual currently selected smartphones, not predefined example smartphones.
+
+Use:
+
+`process.env.AI_API_KEY`
+
+for the API key.
+
+The AI endpoint must run server-side. The browser must never directly call the AI provider using the secret API key. Never expose the API key in frontend code. The AI request must be generated from the currently selected device records retrieved from Supabase.
+
+The AI summary must therefore change automatically when the user selects different smartphones.
